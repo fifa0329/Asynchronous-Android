@@ -55,6 +55,9 @@ public class HandlerThreadActivity extends Activity {
                 for (int i=0; i<primeToFind; i++) {
                     prime = prime.nextProbablePrime();
                 }
+                
+                //处理完计算之后
+                //处理显示
                 displayHandler.sendMessage(
                      Message.obtain(displayHandler, DISPLAY_PRIME, prime));
                 return true;
@@ -70,6 +73,9 @@ public class HandlerThreadActivity extends Activity {
             this.resultsView = resultsView;
         }
 
+        
+        
+        //从60行来！
         @Override
         public boolean handleMessage(Message msg) {
             if (msg.what == DISPLAY_PRIME) {
@@ -87,7 +93,7 @@ public class HandlerThreadActivity extends Activity {
     private static Random random = new Random();
     private static HandlerThread background;
     private static Handler calculator;
-    private static CalculatorCallback callback;
+    private static CalculatorCallback calculatorCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,12 +110,12 @@ public class HandlerThreadActivity extends Activity {
 
         // create a Handler with the main thread's Looper (so that all
         // work submitted to this handler executes on the main thread)
-        // and the display callback that knows how to handle DISPLAY_PRIME
+        // and the display calculatorCallback that knows how to handle DISPLAY_PRIME
         // messages.
         Handler displayHandler = new Handler(new DisplayCallback(resultsView));
 
         if (background == null) {
-            // create a background HandlerThread with a callback that knows
+            // create a background HandlerThread with a calculatorCallback that knows
             // how to handle CALCULATE_PRIME messages.
             background = new HandlerThread("background",Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -125,14 +131,14 @@ public class HandlerThreadActivity extends Activity {
 
             background.start();
 
-            callback = new CalculatorCallback();
-            calculator = new Handler(background.getLooper(), callback);
+            calculatorCallback = new CalculatorCallback();
+            calculator = new Handler(background.getLooper(), calculatorCallback);
         }
 
-        // Give the callback an up-to-date reference to the displayHandler
+        // Give the calculatorCallback an up-to-date reference to the displayHandler
         // so that it can send message's back to the main thread to update
         // the user-interface.
-        callback.setDisplayHandler(displayHandler);
+        calculatorCallback.setDisplayHandler(displayHandler);
 
         Button goButton = (Button) findViewById(R.id.go);
         goButton.setOnClickListener(new View.OnClickListener(){
