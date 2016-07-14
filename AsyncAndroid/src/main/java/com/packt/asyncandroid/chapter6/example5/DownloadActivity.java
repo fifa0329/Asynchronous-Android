@@ -1,6 +1,7 @@
 package com.packt.asyncandroid.chapter6.example5;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,12 +12,12 @@ import android.widget.ImageView;
 
 import com.packt.asyncandroid.LaunchActivity;
 import com.packt.asyncandroid.R;
-import com.packt.asyncandroid.chapter6.ConcurrentDownloadService;
+import com.packt.asyncandroid.chapter6.ConcurrentDownloadIntentService;
 
 public class DownloadActivity extends Activity {
 
     public static final String URL =
-        "http://www.nasa.gov/images/content/158270main_solarflare.jpg";
+            "http://www.nasa.gov/images/content/158270main_solarflare.jpg";
 
     private static final BitmapHandler handler = new BitmapHandler();
     private static final Messenger messenger = new Messenger(handler);
@@ -32,9 +33,14 @@ public class DownloadActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        handler.attach((ImageView)findViewById(R.id.img));
+        handler.attach((ImageView) findViewById(R.id.img));
 
-        ConcurrentDownloadService.startDownload(URL, this, messenger);
+
+        Intent intent = new Intent(this, ConcurrentDownloadIntentService.class);
+        intent.putExtra(ConcurrentDownloadIntentService.DOWNLOAD_FROM_URL, URL);
+        intent.putExtra(ConcurrentDownloadIntentService.REQUEST_ID, URL.hashCode());
+        intent.putExtra(ConcurrentDownloadIntentService.MESSENGER, messenger);
+        startService(intent);
     }
 
     @Override
@@ -49,9 +55,9 @@ public class DownloadActivity extends Activity {
 
         @Override
         public void handleMessage(Message message) {
-            if (message.what == ConcurrentDownloadService.SUCCESSFUL) {
+            if (message.what == ConcurrentDownloadIntentService.SUCCESSFUL) {
                 if (view != null)
-                    view.setImageURI((Uri)message.obj);
+                    view.setImageURI((Uri) message.obj);
             } else {
                 Log.w(LaunchActivity.TAG, "startDownload failed :(");
             }

@@ -1,6 +1,5 @@
 package com.packt.asyncandroid.chapter6;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Message;
@@ -16,7 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class ConcurrentDownloadService extends ConcurrentIntentService {
+public class ConcurrentDownloadIntentService extends MyConcurrentIntentService {
 
     public static final int MAX_CONCURRENT_DOWNLOADS = 3;
     public static final Executor DOWNLOAD_THREAD_POOL =
@@ -36,18 +35,11 @@ public class ConcurrentDownloadService extends ConcurrentIntentService {
     public static final int SUCCESSFUL = "download_successful".hashCode();
     public static final int FAILED = "download_failed".hashCode();
 
-    public static int startDownload(String url, Context ctx, Messenger messenger) {
-        Intent intent = new Intent(ctx, ConcurrentDownloadService.class);
-        intent.putExtra(ConcurrentDownloadService.DOWNLOAD_FROM_URL, url);
-        intent.putExtra(ConcurrentDownloadService.REQUEST_ID, url.hashCode());
-        intent.putExtra(ConcurrentDownloadService.MESSENGER, messenger);
-        ctx.startService(intent);
-        return url.hashCode();
-    }
+
 
     private SimpleDownloader downloader;
 
-    public ConcurrentDownloadService() {
+    public ConcurrentDownloadIntentService() {
         super(DOWNLOAD_THREAD_POOL);
     }
 

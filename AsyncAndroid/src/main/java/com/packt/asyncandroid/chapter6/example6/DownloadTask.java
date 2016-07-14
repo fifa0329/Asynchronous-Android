@@ -12,10 +12,10 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.packt.asyncandroid.LaunchActivity;
-import com.packt.asyncandroid.chapter6.ConcurrentDownloadService;
+import com.packt.asyncandroid.chapter6.ConcurrentDownloadIntentService;
 
 /**
- * A simple class that encapsulates invoking the ConcurrentDownloadService
+ * A simple class that encapsulates invoking the ConcurrentDownloadIntentService
  * with a URL to download, collecting the response from the download service
  * and doing some data-handling work in the background using AsyncTask, for
  * example to load the downloaded data into a Bitmap object off the main thread.
@@ -62,6 +62,11 @@ public abstract class DownloadTask<T> {
     private static final Handler handler = new DownloadTaskHandler(Looper.getMainLooper());
     private static final Messenger messenger = new Messenger(handler);
     private static final SparseArray<DownloadTask> tasks = new SparseArray<DownloadTask>();
+    private String url;
+
+    public DownloadTask(String url) {
+        this.url = url;
+    }
 
     /**
      * Must be called when Activity restarts or finishes to avoid
@@ -74,10 +79,10 @@ public abstract class DownloadTask<T> {
         tasks.clear();
     }
 
-    private String url;
-
-    public DownloadTask(String url) {
-        this.url = url;
+    private static boolean isMainThread() {
+        Thread c = Thread.currentThread();
+        Thread m = Looper.getMainLooper().getThread();
+        return c.equals(m);
     }
 
     public abstract T convertInBackground(Uri data)
@@ -106,16 +111,10 @@ public abstract class DownloadTask<T> {
                 }
             });
         } else {
-            int requestId = ConcurrentDownloadService
+            int requestId = ConcurrentDownloadIntentService
                 .startDownload(url, ctx, messenger);
             tasks.put(requestId, this);
         }
-    }
-
-    private static boolean isMainThread() {
-        Thread c = Thread.currentThread();
-        Thread m = Looper.getMainLooper().getThread();
-        return c.equals(m);
     }
 
     private static class DownloadTaskHandler extends Handler {
@@ -128,7 +127,7 @@ public abstract class DownloadTask<T> {
             DownloadTask task = tasks.get(msg.arg1);
             if (task != null) {
                 try {
-                    if (ConcurrentDownloadService.SUCCESSFUL == msg.what) {
+                    if (ConcurrentDownloadIntentService.SUCCESSFUL == msg.what) {
                         convert(task, (Uri)msg.obj);
                     } else {
                         task.onFailure();

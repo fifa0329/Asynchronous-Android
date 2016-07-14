@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -25,14 +27,14 @@ public class LaunchActivity extends Activity {
 
     public static final String TAG = "async.android";
     public int[] COLORS = new int[]{
-        0xff000000,
-        R.color.ch1,
-        R.color.ch2,
-        R.color.ch3,
-        R.color.ch4,
-        R.color.ch5,
-        R.color.ch6,
-        R.color.ch7
+            0xff000000,
+            R.color.ch1,
+            R.color.ch2,
+            R.color.ch3,
+            R.color.ch4,
+            R.color.ch5,
+            R.color.ch6,
+            R.color.ch7
     };
 
     private Handler handler;
@@ -41,15 +43,14 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.book_layout);
-
+        Logger.init("wlx");
         handler = new Handler();
-
-        new Thread(){
-            public void run(){
+        new Thread() {
+            public void run() {
                 final List<ActivityInfo> info = getActivityList();
                 Log.i(TAG, info.size() + " demos to enjoy!");
 
-                handler.post(new Runnable(){
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         initActivityGrid(info);

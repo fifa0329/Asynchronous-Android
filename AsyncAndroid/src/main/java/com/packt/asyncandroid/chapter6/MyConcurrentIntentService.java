@@ -18,11 +18,11 @@ import java.util.concurrent.Executor;
  * level of concurrency to the sub-class through its configuration of
  * the ExecutorService.
  *
- * Also like IntentService, ConcurrentIntentService will stop itself
+ * Also like IntentService, MyConcurrentIntentService will stop itself
  * when all pending tasks have completed, so there is no need for
  * clients to ever ask the service to stop.
  */
-public abstract class ConcurrentIntentService extends Service {
+public abstract class MyConcurrentIntentService extends Service {
 
     public static final String REQUEST_ID = "request_id";
 
@@ -30,7 +30,7 @@ public abstract class ConcurrentIntentService extends Service {
     private final Executor executor;
     private int counter;
 
-    public ConcurrentIntentService(Executor executor) {
+    public MyConcurrentIntentService(Executor executor) {
         this.executor = executor;
     }
 

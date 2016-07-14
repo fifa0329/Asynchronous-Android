@@ -7,19 +7,19 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.packt.asyncandroid.LaunchActivity;
-import com.packt.asyncandroid.chapter6.ConcurrentIntentService;
+import com.packt.asyncandroid.chapter6.MyConcurrentIntentService;
 
 import java.math.BigInteger;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class PrimesConcurrentIntentService extends ConcurrentIntentService {
+public class PrimesConcurrentIntentService extends MyConcurrentIntentService {
 
-    private static final int MAX_CONCURRENT_CALCULATIONS = 5;
     public static final String PARAM = "prime_to_find";
     public static final String MSNGR = "messenger";
     public static final int INVALID = "invalid".hashCode();
     public static final int RESULT = "nth_prime".hashCode();
+    private static final int MAX_CONCURRENT_CALCULATIONS = 5;
 
     public PrimesConcurrentIntentService() {
         super(Executors.newFixedThreadPool(
