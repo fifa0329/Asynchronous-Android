@@ -1,6 +1,7 @@
 package com.packt.asyncandroid.chapter6.example6;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -19,11 +20,11 @@ import com.packt.asyncandroid.chapter6.ConcurrentDownloadIntentService;
  * with a URL to download, collecting the response from the download service
  * and doing some data-handling work in the background using AsyncTask, for
  * example to load the downloaded data into a Bitmap object off the main thread.
- *
+ * <p/>
  * This class is modelled on AsyncTask, so it should feel very familiar.
- *
+ * <p/>
  * It can be used like this:
- *
+ * <p/>
  * <pre>
  * new DownloadTask&lt;Bitmap&gt;(url) {
  *     @Override
@@ -43,17 +44,17 @@ import com.packt.asyncandroid.chapter6.ConcurrentDownloadIntentService;
  *     }
  * }.execute(context);
  * </pre>
- *
+ * <p/>
  * IMPORTANT: To avoid memory leaks caused by DownloadTask's lingering after the
  * enclosing Activity has finished or restarted, invoke DownloadTask.clearCallbacks()
  * from onPause or onStop in the Activity.
- *
+ * <p/>
  * See NasaImageOfTheDayActivity for two example uses:
- *  - download an RSS, then use the post-download background step to parse the XML
- *    before handing over to the main thread for display.
- *  - download images referenced by the RSS, then use the post-download step to
- *    load the images into Bitmap objects and hand them over to the main thread
- *    for display.
+ * - download an RSS, then use the post-download background step to parse the XML
+ * before handing over to the main thread for display.
+ * - download images referenced by the RSS, then use the post-download step to
+ * load the images into Bitmap objects and hand them over to the main thread
+ * for display.
  *
  * @param <T> the target data-type that this task will convert downloaded data to.
  */
@@ -75,7 +76,7 @@ public abstract class DownloadTask<T> {
     public static void clearCallbacks() {
         if (!isMainThread())
             throw new RuntimeException(
-                "DownloadTask.clearCallbacks must be called on the main thread!");
+                    "DownloadTask.clearCallbacks must be called on the main thread!");
         tasks.clear();
     }
 
@@ -86,7 +87,7 @@ public abstract class DownloadTask<T> {
     }
 
     public abstract T convertInBackground(Uri data)
-    throws Exception;
+            throws Exception;
 
     public abstract void onSuccess(T result);
 
@@ -111,9 +112,14 @@ public abstract class DownloadTask<T> {
                 }
             });
         } else {
-            int requestId = ConcurrentDownloadIntentService
-                .startDownload(url, ctx, messenger);
-            tasks.put(requestId, this);
+
+            Intent intent = new Intent(ctx, ConcurrentDownloadIntentService.class);
+            intent.putExtra(ConcurrentDownloadIntentService.DOWNLOAD_FROM_URL, url);
+            intent.putExtra(ConcurrentDownloadIntentService.REQUEST_ID, url.hashCode());
+            intent.putExtra(ConcurrentDownloadIntentService.MESSENGER, messenger);
+            ctx.startService(intent);
+
+            tasks.put(url.hashCode(), this);
         }
     }
 
@@ -128,7 +134,7 @@ public abstract class DownloadTask<T> {
             if (task != null) {
                 try {
                     if (ConcurrentDownloadIntentService.SUCCESSFUL == msg.what) {
-                        convert(task, (Uri)msg.obj);
+                        convert(task, (Uri) msg.obj);
                     } else {
                         task.onFailure();
                     }
@@ -139,7 +145,7 @@ public abstract class DownloadTask<T> {
         }
 
         private <T> void convert(final DownloadTask<T> task, final Uri uri) {
-            AsyncTask<Void,Void,T> at = new AsyncTask<Void,Void,T>(){
+            AsyncTask<Void, Void, T> at = new AsyncTask<Void, Void, T>() {
                 private Exception e;
 
                 @Override
